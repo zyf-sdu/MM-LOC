@@ -35,7 +35,7 @@ https://github.com/zyf-sdu/MM-LOC
 The overall framework of MM-LOC is illustrated below.
 
 <p align="center">
-<img src="./img/framework.png" width="100%">
+<img src="./img/framework.jpg" width="100%">
 </p>
 
 The proposed framework consists of:
