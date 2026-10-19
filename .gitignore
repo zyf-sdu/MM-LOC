@@ -1,0 +1,16 @@
+# Build outputs and local workspace files
+/build/
+/devel/
+/install/
+/logs/
+.vscode/
+__pycache__/
+*.py[cod]
+*.o
+*.so
+*.a
+
+# Runtime output and local experiment artifacts
+.benchmark/
+FAST_LIO/Log/
+FAST_LIO/PCD/

@@ -76,7 +76,14 @@ This project uses ROS 1, catkin, and C++14. According to the current [CMakeLists
 
 The current CMake configuration uses `find_package(Ceres REQUIRED)`, so Ceres is a required dependency for this version. Record the specific dependency versions used in your experimental environment.
 
-Place this package and a version of FAST-LIO adapted to the dataset in a catkin workspace, then run the following from the workspace root:
+The repository includes the adapted FAST-LIO source in `FAST_LIO/`. MM-LOC itself is the `roll` package at the repository root. Catkin stops searching inside a package directory, so expose FAST-LIO as a sibling package in the workspace. If this repository is located at `/path/to/catkin_ws/src/MM-LOC`, create the sibling symlink once:
+
+```bash
+cd /path/to/catkin_ws/src
+ln -s MM-LOC/FAST_LIO fast_lio
+```
+
+Then run the following from the workspace root:
 
 ```bash
 cd /path/to/catkin_ws
@@ -86,7 +93,7 @@ rospack find roll
 rospack find fast_lio
 ```
 
-The current launch configuration depends on `fast_lio/launch/mapping_nclt.launch`, and the frontend must publish `cloud_registered_body` and `/Odometry`. When using another FAST-LIO version, first verify the launch files, topics, point cloud fields, extrinsics, and timestamp handling. The FAST-LIO2 commit listed in the baseline document identifies only the corresponding baseline experiment.
+The current launch configuration depends on `fast_lio/launch/fastlio_mapping_nclt.launch`, and the frontend must publish `cloud_registered_body` and `/Odometry`. When using another FAST-LIO version, first verify the launch files, topics, point cloud fields, extrinsics, and timestamp handling. The FAST-LIO2 commit listed in the baseline document identifies only the corresponding baseline experiment.
 
 ## 3. Data and Prior Map Preparation
 

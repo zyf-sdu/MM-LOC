@@ -1,0 +1,79 @@
+<launch>
+
+    <arg name="project" default="roll"/>
+    <arg name="params_file" default="$(find roll)/config/params_nclt_loc.yaml"/>
+    <arg name="visualization" default="false"/>
+    <!-- Empty overrides preserve the YAML settings. -->
+    <arg name="global_constraint_inlier_weight" default=""/>
+    <arg name="global_constraint_stability_weight" default=""/>
+    <arg name="global_constraint_weight_mode" default=""/>
+    <arg name="global_constraint_fixed_pos_sigma" default=""/>
+    <arg name="global_constraint_fixed_rot_sigma" default=""/>
+    <arg name="enable_mid_map_server" default="true"/>
+    <arg name="long_map_dir" default="/home/myx/Fighting/0DATASETS/NCLT/20120115/map/block_map/"/>
+    <arg name="mid_map_dir" default="/home/myx/Fighting/0DATASETS/NCLT/20120202/map/block_map/"/>
+
+    <node pkg="tf" type="static_transform_publisher" name="map2odom" args="0 0 0 0 0 0 /map /odom 100" /> 
+    <!-- Parameters -->
+    <rosparam file="$(arg params_file)" command="load" />
+    <param if="$(eval arg('global_constraint_weight_mode') != '')" name="roll/globalConstraintWeightMode" value="$(arg global_constraint_weight_mode)" type="str"/>
+    <param if="$(eval arg('global_constraint_fixed_pos_sigma') != '')" name="roll/globalConstraintFixedPosSigma" value="$(arg global_constraint_fixed_pos_sigma)" type="double"/>
+    <param if="$(eval arg('global_constraint_fixed_rot_sigma') != '')" name="roll/globalConstraintFixedRotSigma" value="$(arg global_constraint_fixed_rot_sigma)" type="double"/>
+
+    <param if="$(eval arg('global_constraint_inlier_weight') != '')" name="roll/globalConstraintInlierWeight" value="$(arg global_constraint_inlier_weight)" type="double"/>
+    <param if="$(eval arg('global_constraint_stability_weight') != '')" name="roll/globalConstraintStabilityWeight" value="$(arg global_constraint_stability_weight)" type="double"/>
+
+    <!-- Start map servers before localization. roslaunch starts sibling nodes
+         asynchronously, so mapOptmization also waits for their services. -->
+    <node 
+        pkg="$(arg project)" 
+        type="$(arg project)_mapServer"      
+        name="$(arg project)_mapServer1"       
+        output="screen"     
+        required="true"
+    >
+        <param name="type" value="long" type="string"/>
+        <param name="global_corner_map_topic" value="/global_corner_map_long" type="string"/>
+        <param name="global_surfer_map_topic" value="/global_surfer_map_long" type="string"/>
+        <param name="dynamic_corner_map" value="/dynamic_corner_map_long" type="string"/>
+        <param name="dynamic_surf_map" value="/dynamic_surf_map_long" type="string"/>
+        <param name="dymaic_map_query" value="/dynamic_long_map_query" type="string"/>
+        <param name="global_map_dir" value="$(arg long_map_dir)" type="string"/>
+    </node>
+
+    <node 
+        pkg="$(arg project)" 
+        type="$(arg project)_mapServer"      
+        name="$(arg project)_mapServer2"       
+        if="$(arg enable_mid_map_server)"
+        output="screen"     
+        required="true"
+    >  
+        <param name="type" value="mid" type="string"/>
+        <param name="global_corner_map_topic" value="/global_corner_map_mid" type="string"/>
+        <param name="global_surfer_map_topic" value="/global_surfer_map_mid" type="string"/>
+        <param name="dynamic_corner_map" value="/dynamic_corner_map_mid" type="string"/>
+        <param name="dynamic_surf_map" value="/dynamic_surf_map_mid" type="string"/>
+        <param name="dymaic_map_query" value="/dynamic_mid_map_query" type="string"/>
+        <param name="global_map_dir" value="$(arg mid_map_dir)" type="string"/>
+    </node>
+
+    <!-- Node order is descriptive; service readiness is enforced in the client. -->
+    <node pkg="$(arg project)" type="$(arg project)_scanRegistration" name="$(arg project)_scanRegistration" output="screen" required="true"/>
+    <node pkg="$(arg project)" type="$(arg project)_mapOptmization" name="$(arg project)_mapOptmization" output="screen" required="true"/>
+    <!-- <node pkg="$(arg project)" type="$(arg project)_dynamic_pcd_node"      name="$(arg project)_dynamic_pcd_node"       output="screen"     required="true"/> -->
+
+    <include file="$(find fast_lio)/launch/fastlio_mapping_nclt.launch">
+        <arg name="rviz" value="$(arg visualization)"/>
+    </include>
+    
+    <!--- Robot State TF -->
+    <include if="$(arg visualization)" file="$(find roll)/launch/include/module_robot_state_publisher.launch" />
+
+    <!--- Run Navsat -->
+    <!-- <include file="$(find roll)/launch/include/module_navsat.launch" /> -->
+
+    <!--- Run Rviz-->
+    <include if="$(arg visualization)" file="$(find roll)/launch/include/module_rviz.launch" />
+
+</launch>
