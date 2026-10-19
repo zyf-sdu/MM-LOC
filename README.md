@@ -7,6 +7,49 @@ MM-LOC addresses environmental changes and insufficient prior map coverage durin
 The public repository accompanying the paper is [zyf-sdu/MM-LOC](https://github.com/zyf-sdu/MM-LOC). This document describes how to configure and run the current code version. The code directory can be named `MM-LOC`.
 The current release is a beta version. The final version will be updated after the paper is accepted.
 
+## Abstract
+
+High-precision localization with prior maps is essential for autonomous mobile robots to reliably perform long-term tasks. However, real-world environments inevitably undergo local structural changes, and robots may even move beyond mapped areas. As a result, a single prior map can hardly provide reliable localization constraints during long-term operation.
+
+To address this issue, we propose **MM-LOC**, a robust 3D localization method based on multi-temporal map fusion. MM-LOC exploits a long-term prior map, a mid-term reference map, and a real-time local map to provide sufficient environmental constraints across different temporal scales.
+
+During map matching, the system adaptively adjusts the confidence of different constraints according to point-cloud matching quality. These multi-temporal map constraints are then incorporated into a sliding-window factor graph for pose optimization. Furthermore, an egocentric map management method based on a two-level spatial index is introduced to efficiently manage large-scale maps and maintain bounded memory consumption.
+
+Extensive experiments on the public NCLT dataset and real-world environments demonstrate that MM-LOC achieves robust and accurate long-term localization performance with real-time efficiency.
+
+## Contributors
+
+- Yongxin Ma
+- Yifan Zhao
+- Jiazhu Zeng
+- Yubo Yao
+- Jinshun Ou
+- Panling Huang
+- Jun Zhou
+
+## Framework
+
+The overall framework of MM-LOC is illustrated below.
+
+<p align="center">
+<img src="./img/framework.jpg" width="100%">
+</p>
+
+The proposed framework consists of:
+
+- **Egocentric Map Management**
+  - Prior Map (PPM)
+  - Reference Map (RRM)
+  - Real-time Local Map (RCM)
+  - Two-level spatial indexing
+  - On-demand map loading
+
+- **Online Localization Pipeline**
+  - LiDAR-inertial odometry front-end
+  - Multi-temporal map matching
+  - Adaptive localization weighting
+  - Sliding-window factor graph optimization
+
 ## 1. Method and Code Structure
 
 The system uses frontend LiDAR–IMU odometry to provide continuous motion estimates, matches the current point cloud against maps from different time periods, and passes the resulting localization constraints to the backend optimizer. The map service uses block maps and cube indices to load local point clouds based on the current position.
